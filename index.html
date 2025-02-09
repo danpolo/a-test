@@ -28,13 +28,12 @@
             cursor: pointer;
             display: inline-block;
         }
-        /* Banner style for logs */
         .banner {
-            background-color: #ff9800;
+            background-color: #28a745;
             color: white;
             padding: 10px;
             margin-top: 20px;
-            display: none; /* Initially hidden */
+            display: none;
         }
     </style>
 </head>
@@ -46,7 +45,6 @@
     <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="handlePhoto(event)">
     <label for="fileInput">📷 צלם תמונה</label>
 
-    <!-- Debug Banner (will show the response text) -->
     <div id="banner" class="banner"></div>
 
     <script>
@@ -54,13 +52,10 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Upload photo automatically and display the returned logs
-            const logs = await uploadPhoto(file);
-
-            // Show the logs in the banner
-            const banner = document.getElementById('banner');
-            banner.textContent = logs; // Display the returned text
-            banner.style.display = 'block'; // Make the banner visible
+            // Upload photo automatically
+            const responseText = await uploadPhoto(file);
+            document.getElementById("banner").innerText = responseText;
+            document.getElementById("banner").style.display = "block"; // Show the banner with response
         }
 
         async function uploadPhoto(file) {
@@ -68,17 +63,16 @@
             formData.append('file', file);
 
             try {
-                const response = await fetch('https://script.google.com/macros/s/AKfycbyw0ujmaAehCydPhITD2F7ZKGEA0dxyqw-mqLrZGrTnLTc8kbTVJJ4Td3Wyveyyb06r/exec', {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbyw0ujmaAehCydPhITD2F7ZKGEA0dxyqw-mqLrZGrTnLTc8kbTVJJ4Td3Wyveyyb06r/exec', {  // Replace with your actual Google Script URL
                     method: 'POST',
                     body: formData
                 });
 
-                // Get the text response (logs from doPost)
-                const logs = await response.text();
-                return logs;  // Return the logs to display
+                const responseText = await response.text(); // Get the response from Apps Script
+                return responseText; // Display the returned response text in the banner
             } catch (error) {
                 console.error('❌ Upload error:', error.message);
-                return '❌ Upload failed: ' + error.message;  // Return error logs if upload fails
+                return 'Upload failed: ' + error.message;
             }
         }
     </script>
