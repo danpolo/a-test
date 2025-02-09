@@ -52,9 +52,9 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Upload photo automatically
-            const responseText = await uploadPhoto(file);
-            document.getElementById("banner").innerText = responseText;
+            // Upload photo automatically and show logs in banner
+            const logs = await uploadPhoto(file);
+            document.getElementById("banner").innerText = logs.join("\n");  // Display logs in the banner
             document.getElementById("banner").style.display = "block"; // Show the banner with response
         }
 
@@ -68,11 +68,11 @@
                     body: formData
                 });
 
-                const responseText = await response.text(); // Get the response from Apps Script
-                return responseText; // Display the returned response text in the banner
+                const result = await response.json(); // Get the response as JSON (logs array)
+                return result; // Return the logs array
             } catch (error) {
                 console.error('❌ Upload error:', error.message);
-                return 'Upload failed: ' + error.message;
+                return ['Upload failed: ' + error.message]; // Return error message as an array
             }
         }
     </script>
