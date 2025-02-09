@@ -15,35 +15,35 @@
         h1 {
             color: #4CAF50;
         }
-        #camera-container, #preview-container {
-            display: none;
-            margin-top: 20px;
+        input {
+            display: none; /* Hide the default file input */
         }
-        video, canvas {
-            width: 100%;
-            max-width: 400px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        button {
-            padding: 12px 20px;
+        label {
+            padding: 15px 20px;
             font-size: 18px;
-            margin: 10px;
+            background: #4CAF50;
+            color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            display: inline-block;
         }
-        .start-btn {
-            background: #4CAF50;
-            color: white;
-        }
-        .capture-btn {
-            background: #ff9800;
-            color: white;
+        #preview {
+            margin-top: 20px;
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         .upload-btn {
             background: #008CBA;
+            padding: 12px 20px;
+            font-size: 18px;
             color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -51,61 +51,48 @@
     <h1>📸 צלמו תמונות לחתונה!</h1>
     <p>לחצו על הכפתור כדי לפתוח את המצלמה</p>
 
-    <button class="start-btn" onclick="startCamera()">📷 הפעל מצלמה</button>
+    <!-- Hidden file input -->
+    <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="previewPhoto(event)">
+    <label for="fileInput">📷 צלם תמונה</label>
 
-    <div id="camera-container">
-        <video id="camera" autoplay playsinline></video>
-        <button class="capture-btn" onclick="capturePhoto()">📸 צלם תמונה</button>
-    </div>
+    <img id="preview" style="display:none;">
 
-    <div id="preview-container">
-        <canvas id="canvas"></canvas>
-        <button class="upload-btn" onclick="uploadPhoto()">☁️ העלאה לגוגל דרייב</button>
-    </div>
+    <button class="upload-btn" onclick="uploadPhoto()">☁️ העלאה לגוגל דרייב</button>
 
     <script>
-        let videoStream = null;
-        let capturedImage = null;
+        let capturedFile = null;
 
-        async function startCamera() {
-            try {
-                videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                document.getElementById('camera').srcObject = videoStream;
-                document.getElementById('camera-container').style.display = 'block';
-            } catch (error) {
-                alert('שגיאה בגישה למצלמה: ' + error.message);
-            }
-        }
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-        function capturePhoto() {
-            const video = document.getElementById('camera');
-            const canvas = document.getElementById('canvas');
-            const context = canvas.getContext('2d');
+            capturedFile = file; // Store file for upload
+            
+            // Preview the image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('preview');
+                img.src = e.target.result;
+                img.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
 
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0);
-
-            capturedImage = canvas.toDataURL('image/jpeg', 0.8); // Convert to base64
-            document.getElementById('preview-container').style.display = 'block';
-
-            // Stop the camera after capturing
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-            }
+            document.querySelector('.upload-btn').style.display = 'inline-block'; // Show upload button
         }
 
         async function uploadPhoto() {
-            if (!capturedImage) {
-                alert('לא צולמה תמונה!');
+            if (!capturedFile) {
+                alert('לא נבחרה תמונה!');
                 return;
             }
+
+            const formData = new FormData();
+            formData.append('file', capturedFile);
 
             try {
                 const response = await fetch('https://script.google.com/macros/s/AKfycbyw0ujmaAehCydPhITD2F7ZKGEA0dxyqw-mqLrZGrTnLTc8kbTVJJ4Td3Wyveyyb06r/exec', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: capturedImage.split(',')[1] }) // Remove the data URL prefix
+                    body: formData
                 });
 
                 const result = await response.text();
