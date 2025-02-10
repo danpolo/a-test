@@ -48,26 +48,29 @@
     <div id="banner" class="banner"></div>
 
     <script>
-async function uploadPhoto() {
-    const formData = new FormData();
-    formData.append('test', 'simple data');
+async function uploadPhoto(file) {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = async function () {
+        const base64Data = reader.result.split(',')[1]; // Get base64 part only
 
-    try {
-        const response = await fetch('https://script.google.com/macros/s/AKfycbyw0ujmaAehCydPhITD2F7ZKGEA0dxyqw-mqLrZGrTnLTc8kbTVJJ4Td3Wyveyyb06r/exec', {
-            method: 'POST',
-            body: formData
-        });
+        try {
+            const response = await fetch('https://script.google.com/macros/s/AKfycbyw0ujmaAehCydPhITD2F7ZKGEA0dxyqw-mqLrZGrTnLTc8kbTVJJ4Td3Wyveyyb06r/exec', {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ image: base64Data })
+            });
 
-        const result = await response.json();
-        console.log("Server response:", result);
-
-        alert("Server response: " + JSON.stringify(result));  // Show logs in an alert
-
-    } catch (error) {
-        console.error('❌ Upload error:', error.message);
-        alert("Upload failed: " + error.message);
-    }
+            const result = await response.json();
+            console.log("✅ Upload success:", result);
+        } catch (error) {
+            console.error('❌ Upload error:', error.message);
+        }
+    };
 }
+
 
     </script>
 </body>
