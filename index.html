@@ -80,13 +80,19 @@ async function uploadPhoto(file) {
         const base64Data = reader.result.split(',')[1]; // Extract base64 part
 
         try {
-            const response = await fetch('https://script.google.com/macros/s/AKfycbyw0ujmaAehCydPhITD2F7ZKGEA0dxyqw-mqLrZGrTnLTc8kbTVJJ4Td3Wyveyyb06r/exec', {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json"
-                },
+            const PROXY_URL = "https://cors-anywhere.herokuapp.com/";  
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyw0ujmaAehCydPhITD2F7ZKGEA0dxyqw-mqLrZGrTnLTc8kbTVJJ4Td3Wyveyyb06r/exec";  
+
+            const response = fetch(PROXY_URL + SCRIPT_URL, { 
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ image: base64Data })
-            });
+            })
+                .then(response => response.json())
+                .then(result => console.log("✅ Upload success:", result))
+                .catch(error => console.error("❌ Upload error:", error));
+
+            
 
             const result = await response.json();
             console.log("✅ Upload success:", result);
