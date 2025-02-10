@@ -48,11 +48,27 @@
     <div id="banner" class="banner"></div>
 
     <script>
+async function handlePhoto(event) {
+    const file = event.target.files[0];
+    if (!file) {
+        console.error("❌ No file selected.");
+        return;
+    }
+
+    await uploadPhoto(file);
+}
+
 async function uploadPhoto(file) {
+    if (!(file instanceof Blob)) {
+        console.error("❌ Invalid file type:", file);
+        return;
+    }
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
+
     reader.onloadend = async function () {
-        const base64Data = reader.result.split(',')[1]; // Get base64 part only
+        const base64Data = reader.result.split(',')[1]; // Extract base64 part
 
         try {
             const response = await fetch('https://script.google.com/macros/s/AKfycbyw0ujmaAehCydPhITD2F7ZKGEA0dxyqw-mqLrZGrTnLTc8kbTVJJ4Td3Wyveyyb06r/exec', {
@@ -69,7 +85,12 @@ async function uploadPhoto(file) {
             console.error('❌ Upload error:', error.message);
         }
     };
+
+    reader.onerror = function () {
+        console.error("❌ FileReader error:", reader.error);
+    };
 }
+
 
 
     </script>
