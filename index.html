@@ -65,40 +65,34 @@ async function handlePhoto(event) {
 
 
 async function uploadPhoto(file) {
-    console.log("📤 uploadPhoto() called with:", file);
-
-    if (!(file instanceof Blob)) {
-        console.error("❌ Invalid file type:", file);
-        return;
-    }
-
     const reader = new FileReader();
     
     reader.onloadend = async function () {
-        console.log("✅ File read successfully. Uploading...");
-        const base64Data = reader.result.split(',')[1]; // Extract base64 part
-
+        const base64Data = reader.result.split(',')[1];
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyw0ujmaAehCydPhITD2F7ZKGEA0dxyqw-mqLrZGrTnLTc8kbTVJJ4Td3Wyveyyb06r/exec";  
-
         try {
             const response = await fetch(SCRIPT_URL, { 
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                mode: 'cors', // Add this line
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*" // Add this line
+                },
                 body: JSON.stringify({ image: base64Data }),
             });
-
-            // Since no-cors doesn't return a response body, you can't use response.json()
-            console.log("✅ Upload success. Response: No content available.");
             
+            // Now you can parse the response
+            const result = await response.json();
+            if (result.status === 'success') {
+                document.getElementById('banner').style.display = 'block';
+                document.getElementById('banner').textContent = 'תמונה הועלתה בהצלחה! ✅';
+            }
         } catch (error) {
             console.error("❌ Upload error:", error.message);
+            document.getElementById('banner').style.display = 'block';
+            document.getElementById('banner').textContent = 'שגיאה בהעלאת תמונה ❌';
         }
     };
-
-    reader.onerror = function () {
-        console.error("❌ FileReader error:", reader.error);
-    };
-
     reader.readAsDataURL(file);
 }
 
