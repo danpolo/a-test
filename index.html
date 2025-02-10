@@ -73,37 +73,38 @@ async function uploadPhoto(file) {
     }
 
     const reader = new FileReader();
-    reader.readAsDataURL(file);
-
+    
     reader.onloadend = async function () {
         console.log("✅ File read successfully. Uploading...");
         const base64Data = reader.result.split(',')[1]; // Extract base64 part
 
-        try {
-            const PROXY_URL = "https://cors-anywhere.herokuapp.com/";  
-            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyw0ujmaAehCydPhITD2F7ZKGEA0dxyqw-mqLrZGrTnLTc8kbTVJJ4Td3Wyveyyb06r/exec";  
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyw0ujmaAehCydPhITD2F7ZKGEA0dxyqw-mqLrZGrTnLTc8kbTVJJ4Td3Wyveyyb06r/exec";  
 
-            const response = fetch(PROXY_URL + SCRIPT_URL, { 
+        try {
+            const response = await fetch(SCRIPT_URL, { 
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ image: base64Data })
-            })
-                .then(response => response.json())
-                .then(result => console.log("✅ Upload success:", result))
-                .catch(error => console.error("❌ Upload error:", error));
+            });
 
-            
+            // 🛑 Fix: Don't call `response.json()` on an invalid response
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status} ${response.statusText}`);
+            }
 
             const result = await response.json();
             console.log("✅ Upload success:", result);
+
         } catch (error) {
-            console.error('❌ Upload error:', error.message);
+            console.error("❌ Upload error:", error.message);
         }
     };
 
     reader.onerror = function () {
         console.error("❌ FileReader error:", reader.error);
     };
+
+    reader.readAsDataURL(file);
 }
 
 
