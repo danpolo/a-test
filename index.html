@@ -78,7 +78,7 @@ async function uploadPhoto(file) {
         console.log("✅ File read successfully. Uploading...");
         const base64Data = reader.result.split(',')[1]; // Extract base64 part
 
-        const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_NEW_SCRIPT_ID/exec";  
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyw0ujmaAehCydPhITD2F7ZKGEA0dxyqw-mqLrZGrTnLTc8kbTVJJ4Td3Wyveyyb06r/exec";  
 
         try {
             const response = await fetch(SCRIPT_URL, { 
