@@ -49,16 +49,24 @@
 
     <script>
 async function handlePhoto(event) {
+    console.log("📸 handlePhoto triggered", event); // Debugging log
+
     const file = event.target.files[0];
+
     if (!file) {
-        console.error("❌ No file selected.");
+        console.error("❌ No file selected or event.target.files is empty.");
         return;
     }
+
+    console.log("✅ File selected:", file.name, "Size:", file.size, "Type:", file.type);
 
     await uploadPhoto(file);
 }
 
+
 async function uploadPhoto(file) {
+    console.log("📤 uploadPhoto() called with:", file);
+
     if (!(file instanceof Blob)) {
         console.error("❌ Invalid file type:", file);
         return;
@@ -68,6 +76,7 @@ async function uploadPhoto(file) {
     reader.readAsDataURL(file);
 
     reader.onloadend = async function () {
+        console.log("✅ File read successfully. Uploading...");
         const base64Data = reader.result.split(',')[1]; // Extract base64 part
 
         try {
@@ -90,6 +99,7 @@ async function uploadPhoto(file) {
         console.error("❌ FileReader error:", reader.error);
     };
 }
+
 
 
 
