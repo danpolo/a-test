@@ -85,7 +85,6 @@ async function uploadPhoto(file) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ image: base64Data }),
-                mode: 'no-cors'  // Attempt no-cors mode to bypass CORS checks
             });
 
             // Since no-cors doesn't return a response body, you can't use response.json()
